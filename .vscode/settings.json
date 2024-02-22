@@ -20,7 +20,10 @@
     "ui_helpers.h": "c",
     "ui_events.h": "c",
     "lv_demo_stress.h": "c",
-    "lvgl.h": "c"
+    "lvgl.h": "c",
+    "netdb.h": "c",
+    "task.h": "c",
+    "esp_netif.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }
