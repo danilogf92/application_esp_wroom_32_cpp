@@ -15,6 +15,8 @@
 
 // #define APPLICATION_DEBUG
 
+Application* Application::application_ = nullptr;
+
 static std::string get_mac (void)
 {
   uint8_t mac[6];
@@ -42,7 +44,7 @@ static std::string get_mac (void)
 }
 
 Application::Application (std::string _name)
-  : device_name (_name), mac_address (), outputs (), sensors (), inputs ()
+  : device_name (_name), mac_address (), sensors (), network_active (false)
 {
   mac_address = get_mac ();
   device_name = device_name + "_" + mac_address;
@@ -53,19 +55,28 @@ Application::Application (std::string _name)
 #endif
 }
 
+Application* Application::get_instance (const std::string& value)
+{
+  if ( nullptr == application_ )
+  {
+    application_ = new Application (value);
+  }
+  return application_;
+}
+
+
 Application::~Application ()
 {
-  for ( auto output : outputs )
+  if ( nullptr != application_ )
   {
-    delete output;
+    delete application_;
+    application_ = nullptr;
   }
-  for ( auto sensor : sensors )
+
+  if ( nullptr != network )
   {
-    delete sensor;
-  }
-  for ( auto input : inputs )
-  {
-    delete input;
+    delete network;
+    network = nullptr;
   }
 }
 
@@ -81,15 +92,26 @@ std::string Application::get_device_name (void) const
 
 void Application::print_device_details (void)
 {
+  print_new_line ();
   debug_normal ("Device name \"%s\"", device_name.c_str ());
   debug_normal ("Input number \"%d\"", inputs.size ());
   debug_normal ("Sensor number \"%d\"", sensors.size ());
   debug_normal ("Output number \"%d\"", outputs.size ());
+
+  if ( network_active )
+  {
+    debug_normal ("Network Active");
+  }
+  else
+  {
+    debug_normal ("Network not initialized");
+  }
+  print_new_line ();
 }
 
 void Application::add_output (IOutput* output)
 {
-  outputs.push_back (output);
+  outputs.push_back (std::unique_ptr<IOutput> (output));
 }
 
 void Application::set_output (std::string _name, bool _state)
@@ -116,22 +138,21 @@ void Application::remove_output (std::string _name)
   {
     if ( ( *iterator )->get_name () == _name )
     {
-      delete* iterator;
-      outputs.erase (iterator);
+      iterator = outputs.erase (iterator);
 #ifdef APPLICATION_DEBUG
       debug_warning ("Output name \"%s\" erased", _name.c_str ());
-#endif      
+#endif
       return;
     }
   }
 #ifdef APPLICATION_DEBUG
   debug_error ("Output with name \"%s\" not found!", _name.c_str ());
-#endif  
+#endif
 }
 
 void Application::add_input (IInput* input)
 {
-  inputs.push_back (input);
+  inputs.push_back (std::unique_ptr <IInput> (input));
 
 #ifdef APPLICATION_DEBUG
   debug_warning ("Input name \"%s\" added", ( input->get_name () ).c_str ());
@@ -144,7 +165,6 @@ void Application::remove_input (std::string _name)
   {
     if ( ( *iterator )->get_name () == _name )
     {
-      delete* iterator;
       inputs.erase (iterator);
 #ifdef APPLICATION_DEBUG
       debug_warning ("Input name \"%s\" erased", _name.c_str ());
@@ -165,21 +185,15 @@ bool Application::get_input_status (std::string _name)
     if ( ( *iterator )->get_name () == _name )
     {
       _state = ( *iterator )->get_status_pin ();
-      // #ifdef APPLICATION_DEBUG
-      //       debug_warning ("Input name \"%s\" set: \"%s\" ", _name.c_str (), debug_get_bool_status (_state));
-      // #endif      
       return _state;
     }
   }
   return _state;
-  // #ifdef APPLICATION_DEBUG
-  //   debug_error ("Input name \"%s\" not found!", _name.c_str ());
-  // #endif  
 }
 
 void Application::add_sensor (ISensor* sensor)
 {
-  sensors.push_back (sensor);
+  sensors.push_back (std::unique_ptr<ISensor> (sensor));
   sensor->init ();
 
 #ifdef APPLICATION_DEBUG
@@ -193,7 +207,6 @@ void Application::remove_sensor (std::string _name)
   {
     if ( ( *iterator )->get_name () == _name )
     {
-      delete* iterator;
       sensors.erase (iterator);
 #ifdef APPLICATION_DEBUG
       debug_warning ("Sensor name \"%s\" erased", _name.c_str ());
@@ -206,14 +219,31 @@ void Application::remove_sensor (std::string _name)
 #endif  
 }
 
-float Application::get_sensor_data (std::string _name, bool filter)
+float Application::get_sensor_data (std::string _name, SensorFilterType filter_type)
 {
   float _value = -1;
   for ( auto iterator = sensors.begin (); iterator != sensors.end (); ++iterator )
   {
     if ( ( *iterator )->get_name () == _name )
     {
-      _value = ( filter ) ? ( ( *iterator )->get_filtered_value () ) : ( ( *iterator )->get_value () );
+      switch ( filter_type )
+      {
+        case SensorFilterType::NONE:
+          _value = ( ( *iterator )->get_value () );
+          break;
+
+        case SensorFilterType::MEDIAN:
+          _value = ( ( *iterator )->get_median_value () );
+          break;
+
+        case SensorFilterType::KALMAN:
+          _value = ( ( *iterator )->get_kalman_value () );
+          break;
+
+        default:
+          break;
+      }
+
 #ifdef APPLICATION_DEBUG
       debug_warning ("Sensor name \"%s\"= %f", _name.c_str (), _value);
 #endif      
@@ -226,3 +256,27 @@ float Application::get_sensor_data (std::string _name, bool filter)
   return _value;
 }
 
+void Application::add_network (const Network* _network, NetworkType _type)
+{
+  network = const_cast< Network* >( _network );
+  network->start (_type);
+  network_active = true;
+}
+
+
+esp_err_t Application::stop_network (void)
+{
+  network->stop ();
+  delete network;
+  network_active = false;
+  return ESP_OK;
+}
+
+esp_err_t Application::network_exist (void)
+{
+  if ( network_active )
+  {
+    return ESP_OK;
+  }
+  return ESP_FAIL;
+}

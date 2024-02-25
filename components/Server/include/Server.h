@@ -7,15 +7,19 @@
 #include "esp_http_server.h"
 #include "cJSON.h"
 #include "driver/gpio.h"
-// #include "esp_spiffs.h"
-// #include "nvs_flash.h"
-// #include "nvs.h"
+typedef struct server
+{
+  gpio_num_t led;
+  float temperature;
+  float distance;
+}server_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
   void init_end_points (void);
+  extern server_t server_data;
 
 #ifdef __cplusplus
 }

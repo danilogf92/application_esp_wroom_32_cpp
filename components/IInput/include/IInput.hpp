@@ -9,7 +9,7 @@ class IInput
 {
   public:
   virtual bool get_status_pin () const = 0;
-  virtual gpio_num_t get_pin () = 0;
+  virtual gpio_num_t get_pin () const = 0;
   virtual std::string get_name (void) const = 0;
   virtual ~IInput () = default;
 };

@@ -23,7 +23,14 @@
     "lvgl.h": "c",
     "netdb.h": "c",
     "task.h": "c",
-    "esp_netif.h": "c"
+    "esp_netif.h": "c",
+    "esp_system.h": "c",
+    "esp_log.h": "c",
+    "esp_timer.h": "c",
+    "gpio.h": "c",
+    "ets_sys.h": "c",
+    "am2302_rmt.h": "c",
+    "sdkconfig.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }

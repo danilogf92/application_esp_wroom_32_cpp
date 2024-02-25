@@ -10,9 +10,16 @@
 constexpr int STACK_DEPTH = 2408;
 constexpr int PRIORITY = 5;
 
-Sensor::Sensor (std::string _name, callback_config_function callback_config, std::function<float ()> func, uint16_t samples) : value (0), sampling_period (samples), enable_sensor (true), name (_name), filtered_value (0), filter (10, 0), fn (func)
+Sensor::Sensor (std::string _name, callback_config_function callback_config, std::function<float ()> func, uint16_t samples) : value (0), sampling_period (samples), enable_sensor (true), name (_name), kalman_value (0), median_value (0), filter (10, 0), fn (func)
 {
   ( *callback_config )( );
+
+  kalman_gain = 0;
+  current_estimate = 0;
+  err_estimate = 2;
+  last_estimate = 0;
+  q = 0.01;
+  err_measure = 2;
 
 #ifdef SENSOR_DEBUG
   debug_warning ("Sensor %s Initialized", name.c_str ());
@@ -26,8 +33,11 @@ Sensor::~Sensor ()
   {
     vTaskDelete (task_handle);
     task_handle = nullptr;
-}
   }
+#ifdef SENSOR_DEBUG
+  debug_warning ("Sensor %s Destructor", name.c_str ());
+#endif
+}
 
 float Sensor::get_value ()
 {
@@ -45,29 +55,31 @@ void Sensor::update_value (float new_value)
 #endif
 }
 
-float Sensor::get_filtered_value ()
+float Sensor::get_median_value ()
 {
-  // TODO Test filter
   float _filter = 0;
 
   for ( float filter_item : filter )
   {
     _filter += filter_item;
-
-#ifdef SENSOR_DEBUG
-    debug_normal ("vector : %0.2f, size: %d", filter_item, filter.size ());
-#endif
   }
 
   _filter = _filter / filter.size ();
 
-  filtered_value = _filter;
+  median_value = _filter;
 
-#ifdef SENSOR_DEBUG
-  debug_warning ("filter_value() value is : %0.2f", filtered_value);
-#endif
+  return median_value;
+}
 
-  return filtered_value;
+float Sensor::get_kalman_value ()
+{
+
+  kalman_gain = err_estimate / ( err_estimate + err_measure );
+  current_estimate = last_estimate + kalman_gain * ( value - last_estimate );
+  err_estimate = ( 1.0 - kalman_gain ) * err_estimate + abs (last_estimate - current_estimate) * q;
+  last_estimate = current_estimate;
+
+  return current_estimate;
 }
 
 std::string Sensor::get_name () const
@@ -89,6 +101,7 @@ esp_err_t Sensor::enable (void)
 #endif
   return ESP_OK;
 }
+
 esp_err_t Sensor::disable (void)
 {
   enable_sensor = false;

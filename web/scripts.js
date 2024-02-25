@@ -1,13 +1,25 @@
 async function getTemperature() {
-  const result = await fetch("api/temperature");
-  console.log(result);
-  const temperature = await result.json();
-  console.log(temperature);
+  const result = await fetch("api/temperature");  
+  const { temperature } = await result.json();
+  const temp = Number(temperature.toFixed(2));
+  console.log(temp);
   const el = document.getElementById("temperature-val");
-  el.innerText = temperature.temperature;
+  el.innerText = temp;
 }
 
 setInterval(getTemperature, 1000);
+
+async function getDistance() {
+  const result = await fetch("api/distance");  
+  const { distance } = await result.json();
+  const temp = Number(distance.toFixed(2));
+  console.log(temp);
+  const el = document.getElementById("distance");
+  el.innerText = temp;
+}
+
+setInterval(getDistance, 2000);
+
 
 let isLedOn = false;
 

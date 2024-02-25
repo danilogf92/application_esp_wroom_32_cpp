@@ -18,11 +18,12 @@ body {
 }
 
 .led:hover {
-    background-color: lightblue;
+    /* background-color: lightblue; */
+    border: 6px solid red;
 }
 
 .led-on {
-    background-color: blue;
+    background-color: blueviolet;
 }
 
 .led-off {

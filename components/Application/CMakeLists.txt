@@ -1,3 +1,3 @@
 idf_component_register(SRCS "Application.cpp"  
                     INCLUDE_DIRS "include"
-                    REQUIRES IInput IOutput ISensor Input Output Sensor debug esp_wifi esp_hw_support efuse)
+                    REQUIRES Network IInput IOutput ISensor Input Output Sensor debug esp_wifi esp_hw_support efuse)

@@ -11,13 +11,24 @@ class Input : public IInput
   gpio_num_t pin;
   std::string status;
   std::string name;
+  Input (gpio_num_t _pin, std::string _name);
+
+  friend class InputFactory;
 
   public:
-  Input ();
-  Input (gpio_num_t _pin, std::string _name);
+  ~Input ();
   bool get_status_pin () const override;
   std::string get_name (void) const override;
-  gpio_num_t get_pin () override;
+  gpio_num_t get_pin () const override;
 };
 
-#endif /* SENSOR_HPP */
+class InputFactory
+{
+  public:
+  static Input* create_input (gpio_num_t pin_out, const std::string& name)
+  {
+    return new Input (pin_out, name);
+  }
+};
+
+#endif /* INPUT_HPP */

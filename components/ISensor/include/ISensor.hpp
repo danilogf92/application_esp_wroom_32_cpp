@@ -18,7 +18,8 @@ class ISensor
   virtual esp_err_t disable (void) = 0;
   virtual std::string get_name () const = 0;
   virtual float get_value () = 0;
-  virtual float get_filtered_value () = 0;
+  virtual float get_median_value () = 0;
+  virtual float get_kalman_value () = 0;
   virtual ~ISensor () = default;
 };
 

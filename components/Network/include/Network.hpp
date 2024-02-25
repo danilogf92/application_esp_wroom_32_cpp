@@ -34,14 +34,23 @@ class Network
   esp_netif_t* esp_netif;
   void wifi_connect_ap (void);
   esp_err_t wifi_connect_sta (void);
+  Network (std::string _wifi_ssid, std::string _wifi_password, uint16_t timeout = 35000);
+
+  friend class NetworkFactory;
 
   public:
-  Network (std::string _wifi_ssid, std::string _wifi_password, uint16_t timeout = 20000);
   ~Network ();
   void print_credentials (void);
   void stop (void);
   void start (NetworkType type);
   int8_t get_clients_ap (void);
 };
-
+class NetworkFactory
+{
+  public:
+  static Network* create_network (std::string _wifi_ssid, std::string _wifi_password, uint16_t timeout = 35000)
+  {
+    return new Network (_wifi_ssid, _wifi_password, timeout);
+  }
+};
 #endif

@@ -9,16 +9,26 @@ class Output : public IOutput
 {
   private:
   gpio_num_t pin_out;
-  std::string status;
+  bool status_pin;
   std::string name;
-  float filtered_value;
+  Output (gpio_num_t pin_out, std::string _name);
+
+  friend class OutputFactory;
 
   public:
   ~Output ();
-  Output (gpio_num_t pin_out, std::string _name);
-  bool get_status_pin () const override;
-  void set_pin (uint32_t state) override;
+  bool get_status_pin (void) const override;
+  void set_pin (bool state) override;
   std::string get_name (void) const override;
+};
+
+class OutputFactory
+{
+  public:
+  static Output* create_output (gpio_num_t pin_out, const std::string& name)
+  {
+    return new Output (pin_out, name);
+  }
 };
 
 #endif /* OUTPUT_HPP */

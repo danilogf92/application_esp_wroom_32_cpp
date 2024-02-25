@@ -4,6 +4,7 @@
 #define WIFI_FAIL_BIT      BIT1
 
 const char* TAG = "Network";
+constexpr uint8_t MAX_ATTEMMPS = 5;
 
 static bool attempt_reconnect = false;
 static EventGroupHandle_t wifi_events;
@@ -38,7 +39,7 @@ Network::~Network ()
 
 void Network::print_credentials (void)
 {
-  ESP_LOGW (TAG, "Network: ssid=%s, password=%s", wifi_ssid.c_str (), wifi_password.c_str ());
+  ESP_LOGI (TAG, "Network: ssid=%s, password=%s", wifi_ssid.c_str (), wifi_password.c_str ());
 }
 
 int8_t Network::get_clients_ap (void)
@@ -78,7 +79,7 @@ void Network::handle_wifi_event (void* arg, esp_event_base_t event_base, int32_t
             wifi_event_sta_disconnected->reason == WIFI_REASON_CONNECTION_FAIL )
           {
 
-            if ( obj->disconnection_err_count++ < 5 )
+            if ( obj->disconnection_err_count++ < MAX_ATTEMMPS )
             {
               vTaskDelay (pdMS_TO_TICKS (5000));
               esp_wifi_connect ();
@@ -106,25 +107,25 @@ void Network::handle_wifi_event (void* arg, esp_event_base_t event_base, int32_t
 
       break;
     case WIFI_EVENT_STA_STOP:
-      ESP_LOGW (TAG, "WIFI_EVENT_STA_STOP");
+      ESP_LOGI (TAG, "WIFI_EVENT_STA_STOP");
       break;
 
     case WIFI_EVENT_AP_START:
-      ESP_LOGE (TAG, "WIFI_EVENT_AP_START");
+      ESP_LOGI (TAG, "WIFI_EVENT_AP_START");
       break;
     case WIFI_EVENT_AP_STOP:
-      ESP_LOGE (TAG, "WIFI_EVENT_AP_STOP");
+      ESP_LOGI (TAG, "WIFI_EVENT_AP_STOP");
       break;
     case WIFI_EVENT_AP_STACONNECTED:
       obj->clients_connected++;
-      ESP_LOGE (TAG, "WIFI_EVENT_AP_STACONNECTED, Clients = %d", obj->clients_connected);
+      ESP_LOGI (TAG, "WIFI_EVENT_AP_STACONNECTED, Clients = %d", obj->clients_connected);
       break;
     case  WIFI_EVENT_AP_STADISCONNECTED:
       obj->clients_connected--;
-      ESP_LOGE (TAG, "WIFI_EVENT_AP_STADISCONNECTED, Clients = %d", obj->clients_connected);
+      ESP_LOGI (TAG, "WIFI_EVENT_AP_STADISCONNECTED, Clients = %d", obj->clients_connected);
       break;
     case WIFI_EVENT_AP_PROBEREQRECVED:
-      ESP_LOGE (TAG, "WIFI_EVENT_AP_PROBEREQRECVED");
+      ESP_LOGI (TAG, "WIFI_EVENT_AP_PROBEREQRECVED");
       break;
 
     default:
@@ -151,7 +152,6 @@ void Network::wifi_connect_ap (void)
 void Network::stop (void)
 {
   esp_wifi_stop ();
-  esp_netif_destroy (esp_netif);
 }
 
 esp_err_t Network::wifi_connect_sta (void)
