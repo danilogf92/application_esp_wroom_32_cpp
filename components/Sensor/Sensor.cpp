@@ -12,7 +12,9 @@ constexpr int PRIORITY = 5;
 
 Sensor::Sensor (std::string _name, callback_config_function callback_config, std::function<float ()> func, uint16_t samples) : value (0), sampling_period (samples), enable_sensor (true), name (_name), kalman_value (0), median_value (0), filter (10, 0), fn (func)
 {
-  ( *callback_config )( );
+  // ( *callback_config )( );
+
+  ESP_ERROR_CHECK (( *callback_config )( ));
 
   kalman_gain = 0;
   current_estimate = 0;
@@ -133,14 +135,14 @@ void Sensor::sensor_task (void* arg)
 #ifdef SENSOR_DEBUG
     debug_warning ("Sensor \"%s\" Sampling period is: %d %f", ( sensor_instance->name ).c_str (), sensor_instance->sampling_period, _fn ());
 #endif
-
     sensor_instance->update_value (_fn ());
-
+    sensor_instance->get_median_value ();
+    sensor_instance->get_kalman_value ();
     vTaskDelay (pdMS_TO_TICKS (sensor_instance->sampling_period));
   }
 }
 
 void Sensor::init (void)
 {
-  xTaskCreatePinnedToCore (sensor_task, "sensor_task", STACK_DEPTH, this, PRIORITY, &task_handle, 0);
+  xTaskCreatePinnedToCore (sensor_task, "sensor_task", STACK_DEPTH, this, PRIORITY, &task_handle, 1);
 }

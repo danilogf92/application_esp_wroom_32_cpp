@@ -7,17 +7,17 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#define COMMON_DATA_MINIMUM                 100
-#define COMMON_DATA_MILISECOND              1000 
-#define COMMON_DATA_SECOND                  1000 
-#define COMMON_DATA_MINUTE                  60*1000 
-#define COMMON_DATA_HOUR                    60*60*1000 
+#define MINIMUM                 100
+#define ONE_MILISECOND          1
+#define ONE_SECOND              1000 
+#define ONE_MINUTE              60*1000
+#define ONE_HOUR                60*60*1000 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define DELAY_SECONDS(value) \
+#define DELAY(value) \
           vTaskDelay (pdMS_TO_TICKS (value))
 
 #define ON true
