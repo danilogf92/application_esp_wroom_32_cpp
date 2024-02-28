@@ -19,7 +19,8 @@ class Application
   std::vector<std::unique_ptr<IOutput>> outputs;
   std::vector<std::unique_ptr<IInput>> inputs;
   std::vector<std::unique_ptr<ISensor>> sensors;
-  Network* network;
+  // Network* network;
+  std::unique_ptr<Network> network;
   bool network_active;
 
   protected:
@@ -45,7 +46,7 @@ class Application
   float get_sensor_data (std::string _name, SensorFilterType filter_type = SensorFilterType::NONE);
   void remove_sensor (std::string _name);
   void add_network (const Network* _network, NetworkType _type);
-  esp_err_t stop_network (void);
+  esp_err_t delete_network (void);
   esp_err_t network_exist (void);
 };
 

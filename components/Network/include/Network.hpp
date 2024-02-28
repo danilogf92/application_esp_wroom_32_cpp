@@ -18,6 +18,7 @@ enum class NetworkType
 {
   AP,
   STA,
+  AP_STA
 };
 
 class Network
@@ -26,31 +27,53 @@ class Network
   static void handle_wifi_event (void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
   private:
-  std::string wifi_ssid;
-  std::string wifi_password;
+  std::string ap_ssid;
+  std::string ap_password;
+  std::string sta_ssid;
+  std::string sta_password;
   uint16_t timeout;
   int8_t clients_connected;
   int8_t disconnection_err_count;
-  esp_netif_t* esp_netif;
-  void wifi_connect_ap (void);
-  esp_err_t wifi_connect_sta (void);
-  Network (std::string _wifi_ssid, std::string _wifi_password, uint16_t timeout = 35000);
+  NetworkType network_type;
+  esp_netif_t* ap_netif;
+  esp_netif_t* sta_netif;
+  bool loop_active;
+
+  // void start_ap_sta (void);
+  // Network (std::string _ssid, std::string _password, uint16_t timeout = 35000);
+  Network (std::string _ap_ssid, std::string _ap_password, std::string _sta_ssid, std::string _sta_password, uint16_t timeout = 35000);
 
   friend class NetworkFactory;
 
   public:
   ~Network ();
   void print_credentials (void);
-  void stop (void);
-  void start (NetworkType type);
+  // void stop (void);
+  // void start (void);
+  void network_connection_type (NetworkType type);
   int8_t get_clients_ap (void);
+  void wifi_stop_sta ();
+  void wifi_init_ap (void);
+  esp_err_t wifi_init_sta (void);
+  void wifi_stop_ap ();
+
 };
 class NetworkFactory
 {
   public:
-  static Network* create_network (std::string _wifi_ssid, std::string _wifi_password, uint16_t timeout = 35000)
+  // static Network* create_network_ap (std::string _ssid, std::string _password, uint16_t timeout = 35000)
+  // {
+  //   return new Network (_ssid, _password, timeout);
+  // }
+
+  // static Network* create_network_sta (std::string _ssid, std::string _password, uint16_t timeout = 35000)
+  // {
+  //   return new Network (_ssid, _password, timeout);
+  // }
+
+  static Network* create_network_ap_sta (std::string ap_ssid, std::string ap_password, std::string sta_ssid, std::string sta_password, uint16_t timeout = 35000)
   {
-    return new Network (_wifi_ssid, _wifi_password, timeout);
+    return new Network (ap_ssid, ap_password, sta_ssid, sta_password, timeout);
   }
 };
 #endif

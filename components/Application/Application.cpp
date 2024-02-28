@@ -72,12 +72,7 @@ Application::~Application ()
     delete application_;
     application_ = nullptr;
   }
-
-  if ( nullptr != network )
-  {
-    delete network;
-    network = nullptr;
-  }
+  network.reset ();
 }
 
 void Application::print_mac_address (void)
@@ -258,18 +253,35 @@ float Application::get_sensor_data (std::string _name, SensorFilterType filter_t
 
 void Application::add_network (const Network* _network, NetworkType _type)
 {
-  network = const_cast< Network* >( _network );
-  network->start (_type);
+  if ( !_network )
+  {
+    debug_error ("Network pointer errror");
+    return;
+  }
+
+  // if ( network )
+  // {
+  //   debug_warning ("Network delete");
+  //   delete_network ();
+  // }
+
+  network = std::unique_ptr<Network> (const_cast< Network* >( _network ));
+  // network = const_cast< Network* >( _network );
+  network->network_connection_type (_type);
   network_active = true;
 }
 
 
-esp_err_t Application::stop_network (void)
+esp_err_t Application::delete_network (void)
 {
-  network->stop ();
-  delete network;
-  network_active = false;
-  return ESP_OK;
+  if ( network )
+  {
+    //network->stop ();
+    // network.reset ();
+    network_active = false;
+    return ESP_OK;
+  }
+  return ESP_FAIL;
 }
 
 esp_err_t Application::network_exist (void)

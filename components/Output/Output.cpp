@@ -15,17 +15,11 @@ Output::~Output ()
 
 Output::Output (gpio_num_t pin, std::string _name) : pin_out (pin), status_pin (false), name (_name)
 {
-  // esp_log_level_set ("gpio", ESP_LOG_NONE);
-
-  // gpio_config_t io_conf;
-  // io_conf.intr_type = GPIO_INTR_DISABLE;
-  // io_conf.mode = GPIO_MODE_OUTPUT;
-  // io_conf.pin_bit_mask = ( 1ULL << pin );
-  // io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
-  // io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
-  // gpio_config (&io_conf);
-
-  gpio_set_direction (pin, GPIO_MODE_OUTPUT);
+  gpio_config_t io_conf;
+  io_conf.intr_type = GPIO_INTR_DISABLE;
+  io_conf.mode = GPIO_MODE_OUTPUT;
+  io_conf.pin_bit_mask = ( 1ULL << pin );
+  gpio_config (&io_conf);
 
 #ifdef OUTPUT_DEBUG
   debug_warning ("Output name \"%s\" pin number: \"%d\" Initialized", name.c_str (), pin);
