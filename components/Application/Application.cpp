@@ -1,21 +1,10 @@
-#include <iostream>
-#include <cstring> 
-
-#include "driver/gpio.h"
-#include "esp_system.h"
-#include "esp_wifi.h"
-#include "esp_event.h"
-#include "esp_log.h"
-#include "esp_efuse.h"
-#include "esp_err.h"
-
 #include "Application.hpp"
-#include "debug.h"
-#include "esp_mac.h"
+#include <mutex>
 
 // #define APPLICATION_DEBUG
 
-Application* Application::application_ = nullptr;
+Application* Application::application_instance = nullptr;
+std::mutex application_mutex;
 
 static std::string get_mac (void)
 {
@@ -50,29 +39,50 @@ Application::Application (std::string _name)
   device_name = device_name + "_" + mac_address;
 
 #ifdef APPLICATION_DEBUG
-  debug_warning ("Device name %s", device_name.c_str ());
-  debug_warning ("Constructor, Application ");
+  debug_normal ("Device name %s", device_name.c_str ());
+  debug_normal ("CONSTRUCTOR, Application ");
 #endif
 }
 
 Application* Application::get_instance (const std::string& value)
 {
-  if ( nullptr == application_ )
+  if ( nullptr == application_instance )
   {
-    application_ = new Application (value);
+    application_instance = new Application (value);
   }
-  return application_;
+  return application_instance;
 }
 
 
 Application::~Application ()
 {
-  if ( nullptr != application_ )
+  if ( nullptr != application_instance )
   {
-    delete application_;
-    application_ = nullptr;
+    outputs.clear ();
+    inputs.clear ();
+    sensors.clear ();
   }
-  network.reset ();
+#ifdef APPLICATION_DEBUG
+  print_new_line ();
+  debug_error ("Device name %s", device_name.c_str ());
+  debug_error ("DESTRUCTOR, Application ");
+#endif
+}
+
+int8_t Application::get_clients_connected (void)
+{
+#ifdef APPLICATION_DEBUG
+  debug_normal ("Clients connected %d", network->network_get_clients_connected ());
+#endif
+
+  if ( nullptr != network )
+  {
+    return network->network_get_clients_connected ();
+  }
+#ifdef APPLICATION_DEBUG
+  debug_normal ("AP or AP_STA mode is required");
+#endif
+  return -1;
 }
 
 void Application::print_mac_address (void)
@@ -92,6 +102,7 @@ void Application::print_device_details (void)
   debug_normal ("Input number \"%d\"", inputs.size ());
   debug_normal ("Sensor number \"%d\"", sensors.size ());
   debug_normal ("Output number \"%d\"", outputs.size ());
+  debug_normal ("Clients connected \"%d\"", network->network_get_clients_connected ());
 
   if ( network_active )
   {
@@ -251,37 +262,41 @@ float Application::get_sensor_data (std::string _name, SensorFilterType filter_t
   return _value;
 }
 
-void Application::add_network (const Network* _network, NetworkType _type)
+void Application::add_network (const Network* _network)
 {
   if ( !_network )
   {
-    debug_error ("Network pointer errror");
+    debug_error ("Network pointer error");
+    return;
+  }
+  network = std::unique_ptr<Network> (const_cast< Network* >( _network ));
+}
+
+void Application::start_network (NetworkType _type)
+{
+  std::lock_guard<std::mutex> lock (application_mutex);
+
+  if ( !network )
+  {
+    debug_error ("Start Network error");
     return;
   }
 
-  // if ( network )
-  // {
-  //   debug_warning ("Network delete");
-  //   delete_network ();
-  // }
-
-  network = std::unique_ptr<Network> (const_cast< Network* >( _network ));
-  // network = const_cast< Network* >( _network );
-  network->network_connection_type (_type);
+  network->network_connection_manager (_type);
   network_active = true;
 }
 
-
-esp_err_t Application::delete_network (void)
+void Application::stop_network (void)
 {
-  if ( network )
+  std::lock_guard<std::mutex> lock (application_mutex);
+
+  if ( !network )
   {
-    //network->stop ();
-    // network.reset ();
-    network_active = false;
-    return ESP_OK;
+    debug_error ("Stop Network error");
+    return;
   }
-  return ESP_FAIL;
+  network->network_stop ();
+  network_active = false;
 }
 
 esp_err_t Application::network_exist (void)

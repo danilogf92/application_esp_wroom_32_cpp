@@ -1,12 +1,10 @@
 #include "Server.h"
-#include <stdlib.h>
-#include <time.h>
 
 static const char* TAG = "SERVER";
 static httpd_handle_t server = NULL;
 
 server_t server_data = {
-  .led = GPIO_NUM_4,
+  .led = GPIO_NUM_2,
   .temperature = 0,
   .distance = 0
 };
@@ -99,7 +97,28 @@ static esp_err_t on_toggle_led_url (httpd_req_t* req)
 
 static esp_err_t on_hello_world_url (httpd_req_t* req)
 {
-  httpd_resp_sendstr (req, "hello world!");
+  cJSON* root = cJSON_CreateObject ();
+  if ( root == NULL )
+  {
+    httpd_resp_send_err (req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to create JSON object");
+    return ESP_FAIL;
+  }
+
+  cJSON_AddStringToObject (root, "msg", "hello world from esp32😀!");
+
+  char* json_string = cJSON_PrintUnformatted (root);
+  if ( json_string == NULL )
+  {
+    cJSON_Delete (root);
+    httpd_resp_send_err (req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to generate JSON");
+    return ESP_FAIL;
+  }
+
+  httpd_resp_send (req, json_string, strlen (json_string));
+
+  cJSON_Delete (root);
+  free (json_string);
+
   return ESP_OK;
 }
 

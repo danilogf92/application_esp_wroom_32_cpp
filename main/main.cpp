@@ -12,15 +12,16 @@
 #include "IOutput.hpp"
 #include "Input.hpp"
 #include "Sensor.hpp"
+#include "Server.h"
 #include "ultrasonic.h"
-#include "debug.h"
+#include "debug_def.h"
 #include "common_data.h"
 
 extern "C" {
   void app_main (void);
 }
 
-#define MAX_DISTAMCE 500
+#define MAX_DISTANCE 500
 
 static ultrasonic_sensor_t ultrasonic_1 = {
 .trigger_pin = GPIO_NUM_5,
@@ -36,7 +37,7 @@ esp_err_t cb_config_sensor_1 ()
 float get_data_sensor_1 ()
 {
   float distance;
-  esp_err_t resp = ultrasonic_measure (&ultrasonic_1, MAX_DISTAMCE, &distance);
+  esp_err_t resp = ultrasonic_measure (&ultrasonic_1, MAX_DISTANCE, &distance);
 
   if ( ESP_OK != resp )
   {
@@ -64,9 +65,8 @@ float get_data_sensor_1 ()
 void other_task (void* arg)
 {
   Application* app_instance = reinterpret_cast< Application* >( arg );
-  // std::function<float ()> _fn = sensor_instance->fn;
 
-  while ( true )
+  while ( 1 )
   {
     app_instance->print_device_details ();
     DELAY (ONE_SECOND);
@@ -77,16 +77,17 @@ void app_main (void)
 {
   // Create application
   Application* app = Application::get_instance ("New_device");
+  // std::unique_ptr<Application> app (Application::get_instance ("New_device"));
 
   // Outputs
-  IOutput* output_1 = OutputFactory::create_output (GPIO_NUM_2, "Led_2");
-  app->add_output (output_1);
+  // IOutput* output_1 = OutputFactory::create_output (GPIO_NUM_2, "Led_2");
+  // app->add_output (output_1);
 
-  IOutput* output_2 = OutputFactory::create_output (GPIO_NUM_4, "Led_3");
-  app->add_output (output_2);
+  // IOutput* output_2 = OutputFactory::create_output (GPIO_NUM_4, "Led_3");
+  // app->add_output (output_2);
 
   // Inputs
-  Input* input_1 = InputFactory::create_input (GPIO_NUM_0, "Button_0");
+  Input* input_1 = InputFactory::create_input (GPIO_NUM_0, "Button_0", 100);
   app->add_input (input_1);
   Input* input_2 = InputFactory::create_input (GPIO_NUM_5, "Button_1");
   app->add_input (input_2);
@@ -96,30 +97,36 @@ void app_main (void)
   app->add_sensor (sensor_1);
 
   // Network
-  Network* network = NetworkFactory::create_network_ap_sta ("first_network", "danilo_tech", "hPalmiraCM", "Hpalmira17");
-  app->add_network (network, NetworkType::AP_STA);
-  // app->add_network (network, NetworkType::AP);
-  // app->add_network (network, NetworkType::STA);
+  app->add_network (Network::get_instance ("first_network", "danilo_tech", "hPalmiraCM", "Hpalmira17"));
+  app->start_network (NetworkType::AP_STA);
+  // app->start_network (NetworkType::AP);
+  // app->start_network (NetworkType::STA);
+  // app->stop_network ();
 
-  app->print_device_details ();
+  // app->print_device_details ();
 
-  xTaskCreatePinnedToCore (other_task, "other_task", 2048 * 2, app, 2, nullptr, 1);
-
-
-  // Add a minimum delay of 100 ms to prevent the watchdog......
-  while ( true )
+  if ( ESP_OK == app->network_exist () )
   {
-    app->set_output ("Led_2", ON);
-    debug_warning ("Button_0 status %d", app->get_input_status ("Button_0")); // Button_0 status
-    debug_normal ("AP clients %d", network->get_clients_ap ()); // Clients
+    init_end_points ();
+  }
 
-    debug_normal ("Ultrasonic_1 normal        = %0.2f", app->get_sensor_data ("Ultrasonic_1", SensorFilterType::NONE)); // normal
-    debug_normal ("Ultrasonic_1 median filter = %0.2f", app->get_sensor_data ("Ultrasonic_1", SensorFilterType::MEDIAN)); // median filter
-    debug_normal ("Ultrasonic_1 Kalman filter = %0.2f", app->get_sensor_data ("Ultrasonic_1", SensorFilterType::KALMAN)); // kalman filter
+  // xTaskCreatePinnedToCore (other_task, "other_task", 2048 * 2, app, 2, nullptr, 1);
+
+
+  //Add a minimum delay of 100 ms to prevent the watchdog......
+  while ( 1 )
+  {
+    // app->set_output ("Led_2", ON);
+    // debug_warning ("Button_0 status %d", app->get_input_status ("Button_0")); // Button_0 status
+    // debug_normal ("Ultrasonic_1 normal        = %0.2f", app->get_sensor_data ("Ultrasonic_1", SensorFilterType::NONE)); // normal
+    // debug_normal ("Ultrasonic_1 median filter = %0.2f", app->get_sensor_data ("Ultrasonic_1", SensorFilterType::MEDIAN)); // median filter
+    // debug_normal ("Ultrasonic_1 Kalman filter = %0.2f", app->get_sensor_data ("Ultrasonic_1", SensorFilterType::KALMAN)); // kalman filter
 
     DELAY (ONE_SECOND);
     // DELAY (MINIMUM);
   }
+  // debug_warning ("End main program");
+  // delete app;
 }
 
 

@@ -1,14 +1,10 @@
-#include <cstdlib>
-#include <iostream>
-#include <cstring>
-
 #include "Sensor.hpp"
-#include "debug.h"
 
 // #define SENSOR_DEBUG
 
 constexpr int STACK_DEPTH = 2408;
 constexpr int PRIORITY = 5;
+constexpr int CORE = 1;
 
 Sensor::Sensor (std::string _name, callback_config_function callback_config, std::function<float ()> func, uint16_t samples) : value (0), sampling_period (samples), enable_sensor (true), name (_name), kalman_value (0), median_value (0), filter (10, 0), fn (func)
 {
@@ -24,7 +20,7 @@ Sensor::Sensor (std::string _name, callback_config_function callback_config, std
   err_measure = 2;
 
 #ifdef SENSOR_DEBUG
-  debug_warning ("Sensor %s Initialized", name.c_str ());
+  debug_warning ("Sensor %s CONSTRUCTOR", name.c_str ());
 #endif
 }
 
@@ -37,7 +33,7 @@ Sensor::~Sensor ()
     task_handle = nullptr;
   }
 #ifdef SENSOR_DEBUG
-  debug_warning ("Sensor %s Destructor", name.c_str ());
+  debug_warning ("Sensor %s DESTRUCTOR", name.c_str ());
 #endif
 }
 
@@ -75,12 +71,10 @@ float Sensor::get_median_value ()
 
 float Sensor::get_kalman_value ()
 {
-
   kalman_gain = err_estimate / ( err_estimate + err_measure );
   current_estimate = last_estimate + kalman_gain * ( value - last_estimate );
   err_estimate = ( 1.0 - kalman_gain ) * err_estimate + abs (last_estimate - current_estimate) * q;
   last_estimate = current_estimate;
-
   return current_estimate;
 }
 
@@ -119,7 +113,7 @@ esp_err_t Sensor::disable (void)
   return ESP_OK;
 }
 
-uint16_t Sensor::get_sample_period ()
+uint16_t Sensor::get_sample_period () const
 {
   return  sampling_period;
 }
@@ -144,5 +138,5 @@ void Sensor::sensor_task (void* arg)
 
 void Sensor::init (void)
 {
-  xTaskCreatePinnedToCore (sensor_task, "sensor_task", STACK_DEPTH, this, PRIORITY, &task_handle, 1);
+  xTaskCreatePinnedToCore (sensor_task, "sensor_task", STACK_DEPTH, this, PRIORITY, &task_handle, CORE);
 }

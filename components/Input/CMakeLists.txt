@@ -1,3 +1,3 @@
 idf_component_register(SRCS "Input.cpp"
                     INCLUDE_DIRS "include"
-                    REQUIRES debug IInput driver)
+                    REQUIRES IInput driver Gpio_base esp_system)

@@ -1,42 +1,44 @@
-#ifndef DEGUG_H
-#define DEBUG_H
+#ifndef DEGUG_DEF_H
+#define DEGUG_DEF_H
 
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef enum debug_color_t
-{
-    DEBUG_COLOR_BOLD = 1,
-    DEBUG_COLOR_DIM = 2,
-    DEBUG_COLOR_UNDERLINE = 4,
-    DEBUG_COLOR_BLINK = 5,
-    DEBUG_COLOR_REVERSE = 7,
-    DEBUG_COLOR_HIDDEN = 8,
-    DEBUG_COLOR_STRIKETHROUGH = 9,
-    DEBUG_COLOR_DOUBLE_UNDERLINE = 21,
-
-    DEBUG_COLOR_BLACK = 30,
-    DEBUG_COLOR_RED = 31,
-    DEBUG_COLOR_GREEN = 32,
-    DEBUG_COLOR_YELLOW = 33,
-    DEBUG_COLOR_BLUE = 34,
-    DEBUG_COLOR_MAGENTA = 35,
-    DEBUG_COLOR_CYAN = 36,
-    DEBUG_COLOR_WHITE = 37,
-
-    DEBUG_COLOR_ORANGE4 = 1058,
-    DEBUG_COLOR_ORANGE4_1 = 1094,
-    DEBUG_COLOR_DARKORANGE3_1 = 1166,
-    DEBUG_COLOR_ORANGE3 = 1172,
-    DEBUG_COLOR_ORANGERED1 = 1202,
-    DEBUG_COLOR_DARKORANGE = 1208,
-    DEBUG_COLOR_ORANGE1 = 1214,
-
-} debug_color_t;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+    typedef enum debug_color_def
+    {
+        DEBUG_COLOR_BOLD = 1,
+        DEBUG_COLOR_DIM = 2,
+        DEBUG_COLOR_UNDERLINE = 4,
+        DEBUG_COLOR_BLINK = 5,
+        DEBUG_COLOR_REVERSE = 7,
+        DEBUG_COLOR_HIDDEN = 8,
+        DEBUG_COLOR_STRIKETHROUGH = 9,
+        DEBUG_COLOR_DOUBLE_UNDERLINE = 21,
+
+        DEBUG_COLOR_BLACK = 30,
+        DEBUG_COLOR_RED = 31,
+        DEBUG_COLOR_GREEN = 32,
+        DEBUG_COLOR_YELLOW = 33,
+        DEBUG_COLOR_BLUE = 34,
+        DEBUG_COLOR_MAGENTA = 35,
+        DEBUG_COLOR_CYAN = 36,
+        DEBUG_COLOR_WHITE = 37,
+
+        DEBUG_COLOR_ORANGE4 = 1058,
+        DEBUG_COLOR_ORANGE4_1 = 1094,
+        DEBUG_COLOR_DARKORANGE3_1 = 1166,
+        DEBUG_COLOR_ORANGE3 = 1172,
+        DEBUG_COLOR_ORANGERED1 = 1202,
+        DEBUG_COLOR_DARKORANGE = 1208,
+        DEBUG_COLOR_ORANGE1 = 1214,
+
+    } debug_color_def_t;
+
+
 
 #define debug_clg(color, background, text_decoration, emoji, format, ...) \
     do { \

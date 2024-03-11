@@ -4,11 +4,14 @@
 #include "ISensor.hpp"
 #include <iostream>
 #include <string>
+#include <cstdlib>
 #include <vector>
 #include <functional>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
+#include "debug_def.h"
 
 enum class SensorFilterType
 {
@@ -49,7 +52,7 @@ class Sensor : public ISensor
   std::string get_name () const override;
   esp_err_t enable (void) override;
   esp_err_t disable (void) override;
-  uint16_t get_sample_period ();
+  uint16_t get_sample_period () const;
 };
 
 class SensorFactory

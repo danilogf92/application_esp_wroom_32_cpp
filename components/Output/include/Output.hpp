@@ -1,17 +1,17 @@
 #ifndef OUTPUT_HPP
 #define OUTPUT_HPP
 
-#include "IOutput.hpp"
-#include "driver/gpio.h"
+#include <iostream>
 #include <string>
+#include "driver/gpio.h"
+#include "IOutput.hpp"
+#include "Gpio_base.hpp"
 
-class Output : public IOutput
+class Output : public Gpio_base, public IOutput
 {
   private:
-  gpio_num_t pin_out;
   bool status_pin;
-  std::string name;
-  Output (gpio_num_t pin_out, std::string _name);
+  Output (gpio_num_t _pin, std::string _name);
 
   friend class OutputFactory;
 
@@ -25,9 +25,9 @@ class Output : public IOutput
 class OutputFactory
 {
   public:
-  static Output* create_output (gpio_num_t pin_out, const std::string& name)
+  static Output* create_output (gpio_num_t _pin, const std::string& name)
   {
-    return new Output (pin_out, name);
+    return new Output (_pin, name);
   }
 };
 
