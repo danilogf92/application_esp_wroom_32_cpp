@@ -1,31 +1,77 @@
-body {
-    background-color: burlywood;
+.card {
+    background-color: rgb(248, 242, 234);
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    overflow: hidden;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-.main-body {
-    margin: auto;
+.card h2 {
+    margin-top: 0;
     text-align: center;
+}
+
+.card-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card-content h3,
+.card-content button {
+    margin-bottom: 20px; /* Ajusta el valor según tu preferencia */
 }
 
 .led {
     width: 50px;
     height: 50px;
-    border: 2px solid black;
-    margin: auto;
-    cursor: pointer;
-    border-radius: 20px;
-    transition: background-color 0.3s;
-}
+    border-radius: 50%;
 
-.led:hover {
-    /* background-color: lightblue; */
-    border: 6px solid red;
+    margin-bottom: 5%;
 }
 
 .led-on {
-    background-color: blueviolet;
+    background-color: rgb(0, 30, 128);
 }
 
 .led-off {
-    background-color: azure;
+    background-color: gray;
+}
+
+#distance {
+    font-weight: bold;
+}
+
+.button {
+    padding: 10px 15px;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: #29b669;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px #999;
+}
+
+.button:hover {
+    opacity: 0.8;
+    box-shadow: 0 4px #666;
+}
+
+.button:active {
+    background-color: #23db42;
+    color: #d9d9d9;
+    box-shadow: 0 2px #666;
+    opacity: 0.8;
 }

@@ -4,16 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" type="text/css"  href="/style.css">
-    <title>Temperature Monitor</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>ESP32 Server</title>
 </head>
 <body>
-    <section class="main-body">
-        <h3>Current temperature is <span id="temperature-val">0</span>°C</h3> 
-        <div id="led-button" class="led led-off" onclick="toggleLed()"></div>      
-        
-        <h3>Distance <span id="distance">0</span> cm</h3> 
-    </section>
+    <div class="card">
+        <h2>Esp32 Proxi Example</h2>
+        <div class="card-content">
+            <h3>Current temperature <span id="temperature-val">0</span>°C</h3> 
+            <div id="led-button" class="led led-off"></div>      
+            <button class="button" onclick="toggleLed()">ON/OFF</button>
+            <h3>Distance <span id="distance">0</span> cm</h3> 
+        </div>
+    </div>
     
     <script src="scripts.js"></script>
 </body>

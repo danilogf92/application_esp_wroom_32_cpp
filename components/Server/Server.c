@@ -3,20 +3,27 @@
 static const char* TAG = "SERVER";
 static httpd_handle_t server = NULL;
 
-server_t server_data = {
+server_data_t server_data = {
   .led = GPIO_NUM_2,
   .temperature = 0,
   .distance = 0
 };
 
-static void toggle_led (bool is_on)
+static void toggle_output (gpio_num_t _pin, bool is_on)
 {
-  gpio_set_level (server_data.led, is_on);
+  gpio_set_level (_pin, is_on);
 }
 
-static void InitializeLed ()
+static esp_err_t initialize_output (gpio_num_t _pin)
 {
-  gpio_set_direction (server_data.led, GPIO_MODE_OUTPUT);
+  gpio_config_t io_conf;
+  io_conf.intr_type = GPIO_INTR_DISABLE;
+  io_conf.mode = GPIO_MODE_OUTPUT;
+  io_conf.pin_bit_mask = ( 1ULL << _pin );
+  io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+  io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+  esp_err_t err = gpio_config (&io_conf);
+  return err;
 }
 
 static esp_err_t on_get_temperature (httpd_req_t* req)
@@ -89,7 +96,7 @@ static esp_err_t on_toggle_led_url (httpd_req_t* req)
   cJSON* is_on_json = cJSON_GetObjectItem (payload, "isLedOn");
   bool is_on = cJSON_IsTrue (is_on_json);
   cJSON_Delete (payload);
-  toggle_led (is_on);
+  toggle_output (server_data.led, is_on);
   httpd_resp_set_status (req, "204 NO CONTENT");
   httpd_resp_send (req, NULL, 0);
   return ESP_OK;
@@ -126,7 +133,7 @@ void init_end_points (void)
 {
   ESP_LOGI (TAG, "Server start");
 
-  InitializeLed ();
+  ESP_ERROR_CHECK (initialize_output (server_data.led));
   httpd_config_t config = HTTPD_DEFAULT_CONFIG ();
 
   ESP_ERROR_CHECK (httpd_start (&server, &config));
@@ -155,13 +162,3 @@ void init_end_points (void)
   .handler = on_get_distance };
   httpd_register_uri_handler (server, &get_distance);
 }
-
-
-
-
-
-
-
-
-
-

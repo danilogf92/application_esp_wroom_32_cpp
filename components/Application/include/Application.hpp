@@ -17,10 +17,10 @@
 #include "debug_def.h"
 #include "esp_mac.h"
 
-#include "IOutput.hpp"
+#include "Output.hpp"
 #include "ISensor.hpp"
 #include "Sensor.hpp"
-#include "IInput.hpp"
+#include "Input.hpp"
 #include "Network.hpp"
 
 class Application
@@ -28,15 +28,13 @@ class Application
   private:
   std::string device_name;
   std::string mac_address;
-  std::vector<std::unique_ptr<IOutput>> outputs;
-  std::vector<std::unique_ptr<IInput>> inputs;
+  std::vector<std::unique_ptr<Output>> outputs;
+  std::vector<std::unique_ptr<Input>> inputs;
   std::vector<std::unique_ptr<ISensor>> sensors;
   std::unique_ptr<Network> network;
   bool network_active;
-
-  protected:
-  Application (std::string _name);
   static Application* application_instance;
+  Application (std::string _name);
 
   public:
   ~Application ();
@@ -47,10 +45,10 @@ class Application
   std::string get_device_name () const;
   void print_mac_address (void);
   void print_device_details (void);
-  void add_output (IOutput* output);
+  void add_output (Output* output);
   void set_output (std::string _name, bool _state);
   void remove_output (std::string _name);
-  void add_input (IInput* input);
+  void add_input (Input* input);
   bool get_input_status (std::string _name);
   void remove_input (std::string _name);
   void add_sensor (ISensor* sensor);

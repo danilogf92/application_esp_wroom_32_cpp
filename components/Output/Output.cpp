@@ -16,7 +16,7 @@ Output::Output (gpio_num_t _pin, std::string _name) : Gpio_base (_pin, _name, GP
 #endif
 }
 
-bool Output::get_status_pin (void) const
+bool Output::get_status_pin (void)
 {
   return status_pin;
 }
@@ -34,4 +34,9 @@ void Output::set_pin (bool state)
 std::string Output::get_name (void) const
 {
   return name;
+}
+
+gpio_num_t Output::get_pin () const
+{
+  return pin;
 }

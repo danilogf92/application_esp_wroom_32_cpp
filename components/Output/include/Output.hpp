@@ -4,10 +4,10 @@
 #include <iostream>
 #include <string>
 #include "driver/gpio.h"
-#include "IOutput.hpp"
+#include "IGpio.hpp"
 #include "Gpio_base.hpp"
 
-class Output : public Gpio_base, public IOutput
+class Output : public Gpio_base, public IGpio
 {
   private:
   bool status_pin;
@@ -17,9 +17,10 @@ class Output : public Gpio_base, public IOutput
 
   public:
   ~Output ();
-  bool get_status_pin (void) const override;
-  void set_pin (bool state) override;
+  bool get_status_pin (void) override;
+  void set_pin (bool state);
   std::string get_name (void) const override;
+  gpio_num_t get_pin () const override;
 };
 
 class OutputFactory

@@ -53,7 +53,6 @@ Application* Application::get_instance (const std::string& value)
   return application_instance;
 }
 
-
 Application::~Application ()
 {
   if ( nullptr != application_instance )
@@ -115,9 +114,9 @@ void Application::print_device_details (void)
   print_new_line ();
 }
 
-void Application::add_output (IOutput* output)
+void Application::add_output (Output* output)
 {
-  outputs.push_back (std::unique_ptr<IOutput> (output));
+  outputs.push_back (std::unique_ptr<Output> (output));
 }
 
 void Application::set_output (std::string _name, bool _state)
@@ -156,9 +155,9 @@ void Application::remove_output (std::string _name)
 #endif
 }
 
-void Application::add_input (IInput* input)
+void Application::add_input (Input* input)
 {
-  inputs.push_back (std::unique_ptr <IInput> (input));
+  inputs.push_back (std::unique_ptr <Input> (input));
 
 #ifdef APPLICATION_DEBUG
   debug_warning ("Input name \"%s\" added", ( input->get_name () ).c_str ());

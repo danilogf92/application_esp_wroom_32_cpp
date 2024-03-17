@@ -3,7 +3,7 @@
 
 #include <string>
 #include "driver/gpio.h"
-#include "IInput.hpp"
+#include "IGpio.hpp"
 #include "Gpio_base.hpp"
 
 #include "freertos/FreeRTOS.h"
@@ -25,7 +25,7 @@ enum class InputEvents
   TIMEOUT,
 };
 
-class Input : public Gpio_base, public IInput
+class Input : public Gpio_base, public IGpio
 {
   private:
   uint16_t debounce_time;
